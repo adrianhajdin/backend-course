@@ -11,7 +11,7 @@ const schedulePaymentReminder = async (subscription) => {
 
   try {
     await client.trigger({
-      url: 'https://your-api-domain.com/api/workflow',
+      url: `${process.env.VPS_PUBLIC_IP}/api/workflow`,
       body: { subscriptionId: subscription._id },
       notBefore: reminderTime.toISOString(),
     });

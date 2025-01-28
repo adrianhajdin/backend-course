@@ -31,12 +31,16 @@ app.use(express.static(path.join(__dirname, "public")));
 // Define routes
 app.use("/api/users", userRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
-app.use('/api', workflowRoutes);
+app.use('/api/workflow', workflowRoutes);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
   next(createError(404));
 });
+
+app.get("/", (req, res) => {
+  res.send("Welcome to the Subscriptions API");
+})
 
 // Error handler
 app.use((err, req, res, next) => {
