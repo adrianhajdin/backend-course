@@ -4,13 +4,14 @@ const { getSubscriptionById, sendReminder } = require('../controllers/subscripti
 
 const router = express.Router();
 
+// Define the POST route for the QStash workflow
 router.post(
-  '/workflow',
+  '/',
   serve(async (context) => {
     const { subscriptionId } = context.requestPayload;
 
     // Fetch subscription details
-    const subscription = await context.run("fetch-subscription", async () => {
+    const subscription = await context.run('fetch-subscription', async () => {
       return await getSubscriptionById(subscriptionId);
     });
 
@@ -18,8 +19,8 @@ router.post(
       throw new Error('Subscription not found');
     }
 
-    // Send reminder email
-    await context.run("send-reminder-email", async () => {
+    // Send a reminder email
+    await context.run('send-reminder-email', async () => {
       await sendReminder(subscription);
     });
 

@@ -260,3 +260,136 @@ ufw enable
 ---
 
 With these steps, you should have your Node.js app successfully deployed and accessible on your VPS. Let me know if you need further clarification!
+
+
+---
+To update the code on your VPS, you need to pull the latest changes from your repository (if you're using Git) or re-upload the updated files. Here’s a step-by-step guide:
+
+---
+
+### **1. If You’re Using Git**
+
+#### **Step 1.1: Check Current Code State**
+1. SSH into your VPS:
+   ```bash
+   ssh root@<your-vps-ip>
+   ```
+
+2. Navigate to your project directory:
+   ```bash
+   cd /path/to/your/project
+   ```
+
+#### **Step 1.2: Pull the Latest Changes**
+1. Ensure the correct branch is checked out:
+   ```bash
+   git branch
+   ```
+   If not, switch to the appropriate branch:
+   ```bash
+   git checkout <branch-name>
+   ```
+
+2. Pull the latest changes:
+   ```bash
+   git pull origin <branch-name>
+   ```
+
+---
+
+### **2. If You’re Not Using Git**
+
+#### **Option 1: Upload Files via SCP**
+1. From your local machine, upload the updated files to the VPS:
+   ```bash
+   scp -r /local/path/to/project root@<your-vps-ip>:/path/to/project
+   ```
+   Replace `/local/path/to/project` with your local project path and `/path/to/project` with the directory on your VPS.
+
+#### **Option 2: Use File Managers (Optional)**
+- You can use tools like **FileZilla** or **WinSCP** to upload updated files to the VPS.
+
+---
+
+### **3. Install Dependencies (if Updated)**
+
+If you’ve added or updated any dependencies in `package.json`, run the following commands in your project directory:
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. If you’ve removed unused dependencies:
+   ```bash
+   npm prune
+   ```
+
+---
+
+### **4. Restart the Application**
+
+After updating the code, you need to restart your app to apply the changes. Use PM2 (or any other process manager you’re using):
+
+1. Restart the app:
+   ```bash
+   pm2 restart subscription-tracker
+   ```
+
+2. If PM2 isn’t running the app, start it:
+   ```bash
+   pm2 start app.js --name subscription-tracker
+   ```
+
+3. Save the process to restart automatically on reboot:
+   ```bash
+   pm2 save
+   ```
+
+---
+
+### **5. Verify the Changes**
+
+#### **Step 5.1: Test Locally on the VPS**
+1. Test if the app is running locally:
+   ```bash
+   curl http://localhost:5500
+   ```
+   - Replace `5500` with the port your app is running on.
+
+#### **Step 5.2: Test Publicly**
+1. Open your app’s public URL in the browser:
+   ```bash
+   http://<your-vps-ip>
+   ```
+
+---
+
+### **6. Debug If Needed**
+1. Check PM2 logs for errors:
+   ```bash
+   pm2 logs subscription-tracker
+   ```
+
+2. Check Nginx logs:
+   ```bash
+   tail -f /var/log/nginx/error.log
+   ```
+
+3. Test API endpoints using `curl`:
+   ```bash
+   curl -X POST http://<your-vps-ip>/api/workflow \
+   -H "Content-Type: application/json" \
+   -d '{"subscriptionId": "your-subscription-id"}'
+   ```
+
+---
+
+### **Summary**
+
+1. Use `git pull` or re-upload files to update your code.
+2. Install dependencies with `npm install` if necessary.
+3. Restart your app with PM2: `pm2 restart subscription-tracker`.
+4. Test locally and publicly to ensure the update is applied.
+
+Let me know if you need help with any specific step!
