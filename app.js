@@ -1,19 +1,16 @@
-require("dotenv").config();
-const express = require("express");
-const path = require("path");
-const cookieParser = require("cookie-parser");
-const logger = require("morgan");
-const createError = require("http-errors");
-const dotenv = require("dotenv");
+import express from 'express';
+import connectDB from './config/db.js';
+import path from "path";
+import cookieParser from "cookie-parser";
+import logger from "morgan";
+import createError from "http-errors";
 
 // Import routes
-const userRoutes = require("./routes/user.routes");
-const workflowRoutes = require('./routes/workflow.routes');
-const subscriptionRoutes = require("./routes/subscription.routes");
+import userRoutes from "./routes/user.routes.js";
+import workflowRoutes from './routes/workflow.routes.js';
+import subscriptionRoutes from "./routes/subscription.routes.js";
 
-// Import database connection
-const connectDB = require("./config/db");
-const Category = require("./models/Category");
+import { fileURLToPath } from "url";
 
 // Initialize Express app
 const app = express();
@@ -22,10 +19,16 @@ const app = express();
 connectDB();
 
 // Set up middleware
+// Define __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Use the new __dirname
+app.use(express.static(path.join(__dirname, "public")));
 app.use(logger("dev"));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "public")));
 
 app.use('/api/workflow', workflowRoutes);
 app.use(express.json());
@@ -76,4 +79,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-module.exports = app;
+export default app;

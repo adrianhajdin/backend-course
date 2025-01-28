@@ -1,13 +1,18 @@
-const express = require('express');
+import express from 'express';
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const { serve } = require('@upstash/workflow/express');
-const { getSubscriptionById, sendReminder } = require('../controllers/subscription.controller');
+
+import { 
+  getSubscriptionById, 
+  sendReminder 
+} from '../controllers/subscription.controller.js';
 
 const router = express.Router();
 
 // Define the POST route for the QStash workflow
-router.post(
-  '/',
-  serve(async (context) => {
+router.post('/', serve(async (context) => {
     const { subscriptionId } = context.requestPayload;
 
     // Fetch subscription details
@@ -28,4 +33,4 @@ router.post(
   })
 );
 
-module.exports = router;
+export default router;

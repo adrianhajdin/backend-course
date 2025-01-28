@@ -1,8 +1,9 @@
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-const registerUser = async (req, res) => {
+import User from "../models/User.js";
+
+export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const userExists = await User.findOne({ email });
@@ -22,7 +23,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -45,7 +46,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-const getUserProfile = async (req, res) => {
+export const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password").populate("subscriptions");
     if (!user) {
@@ -57,5 +58,3 @@ const getUserProfile = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
-module.exports = { registerUser, loginUser, getUserProfile };

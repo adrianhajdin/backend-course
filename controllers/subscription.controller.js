@@ -1,11 +1,15 @@
-const Subscription = require("../models/Subscription");
-const { Client } = require("@upstash/workflow");
-const {sendEmail} = require("../utils/sendEmail");
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { Client } = require('@upstash/workflow');
+
+import Subscription from "../models/Subscription.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 const client = new Client({ token: process.env.QSTASH_TOKEN });
 
-const schedulePaymentReminder = async (subscription) => {
+export const schedulePaymentReminder = async (subscription) => {
   const reminderTime = new Date(subscription.renewalDate);
   reminderTime.setDate(reminderTime.getDate() - 3); // 3 days before renewal
 
@@ -15,14 +19,14 @@ const schedulePaymentReminder = async (subscription) => {
       body: { subscriptionId: subscription._id },
       notBefore: reminderTime.toISOString(),
     });
+
     console.log('Workflow triggered successfully via QStash');
   } catch (error) {
     console.error('Failed to trigger workflow:', error.message);
   }
 };
 
-
-const getSubscriptionById = async (id) => {
+export const getSubscriptionById = async (id) => {
   try {
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -40,7 +44,8 @@ const getSubscriptionById = async (id) => {
     throw error;
   }
 };
-const sendReminder = async (subscription) => {
+
+export const sendReminder = async (subscription) => {
   try {
     const message = `
       Hi there,
@@ -68,18 +73,22 @@ const sendReminder = async (subscription) => {
   }
 };
 
-const getSubscriptions = async (req, res) => {
+export const getSubscriptions = async (req, res) => {
   try {
     const mockUserId = "64d64c29fa23ec2f4a2b54d1"; // Replace with a valid ObjectId from your database
 
-    const subscriptions = await Subscription.find({ user: mockUserId}).populate("category");
+    const subscriptions = await Subscription.find({ user: mockUserId})
+    // .populate({
+    //   path: 'category', // Use path if Category is a referenced model
+    //   model: 'Category',
+    // });
     res.status(200).json(subscriptions);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
-const addSubscription = async (req, res) => {
+export const addSubscription = async (req, res) => {
   const { name, price, frequency, renewalDate, category } = req.body;
 
   if (!name || !price || !frequency || !renewalDate) {
@@ -103,7 +112,7 @@ const addSubscription = async (req, res) => {
   }
 };
 
-const updateSubscription = async (req, res) => {
+export const updateSubscription = async (req, res) => {
   const { id } = req.params;
   const { name, price, frequency, renewalDate, category } = req.body;
 
@@ -131,7 +140,7 @@ const updateSubscription = async (req, res) => {
   }
 };
 
-const deleteSubscription = async (req, res) => {
+export const deleteSubscription = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -150,14 +159,4 @@ const deleteSubscription = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
-};
-
-module.exports = {
-  getSubscriptionById,
-  sendReminder,
-  schedulePaymentReminder,
-  getSubscriptions,
-  addSubscription,
-  updateSubscription,
-  deleteSubscription,
 };

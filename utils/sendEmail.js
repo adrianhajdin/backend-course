@@ -1,6 +1,6 @@
-const axios = require("axios");
+import axios from "axios";
 
-const sendEmail = async ({ to, subject, message }) => {
+export const sendEmail = async ({ to, subject, message }) => {
   try {
     const response = await axios.post(
       "https://api.emailjs.com/api/v1.0/email/send", // EmailJS REST API endpoint
@@ -28,5 +28,3 @@ const sendEmail = async ({ to, subject, message }) => {
     throw error;
   }
 };
-
-module.exports = { sendEmail };
