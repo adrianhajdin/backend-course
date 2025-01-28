@@ -33,14 +33,15 @@ app.use("/api/users", userRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use('/api/workflow', workflowRoutes);
 
-// Catch 404 and forward to error handler
-app.use((req, res, next) => {
-  next(createError(404));
-});
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Subscriptions API");
 })
+
+// Catch 404 and forward to error handler
+app.use((req, res, next) => {
+  next(createError(404));
+});
 
 // Error handler
 app.use((err, req, res, next) => {
