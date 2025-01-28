@@ -23,15 +23,16 @@ connectDB();
 
 // Set up middleware
 app.use(logger("dev"));
-app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use('/api/workflow', workflowRoutes);
+app.use(express.json());
+
 // Define routes
 app.use("/api/users", userRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
-app.use('/api/workflow', workflowRoutes);
 
 
 app.get("/", (req, res) => {
