@@ -5,9 +5,9 @@ const require = createRequire(import.meta.url);
 const { serve } = require('@upstash/workflow/express');
 
 import { 
-  getSubscriptionById, 
-  sendReminder 
+  getSubscriptionById,  
 } from '../controllers/subscription.controller.js';
+import { sendReminder } from '../utils/sendEmail.js';
 
 const router = express.Router();
 

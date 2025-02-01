@@ -1,22 +1,23 @@
-import express from "express"
+import express from "express";
 
+import authMiddleware from "../middlewares/auth.middleware.js";
 import {
   getSubscriptions,
   addSubscription,
   updateSubscription,
   deleteSubscription,
-} from "../controllers/subscription.controller.js"
+  getSubscriptionById,
+} from "../controllers/subscription.controller.js";
+
 const router = express.Router();
 
-router.post("/", addSubscription);
-router.delete("/:id", deleteSubscription);
-router.put("/:id", updateSubscription);
-router.get("/", getSubscriptions);
+// Protect all subscription routes
+router.use(authMiddleware);
 
-// const authMiddleware = require("../middlewares/auth.middleware");
-// router.post("/", authMiddleware, addSubscription);
-// router.get("/", authMiddleware, getSubscriptions);
-// router.put("/:id", authMiddleware, updateSubscription);
-// router.delete("/:id", authMiddleware, deleteSubscription);
+router.post("/", addSubscription);
+router.get("/", getSubscriptions);
+router.get("/:id", getSubscriptionById);
+router.put("/:id", updateSubscription);
+router.delete("/:id", deleteSubscription);
 
 export default router;

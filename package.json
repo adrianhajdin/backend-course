@@ -8,9 +8,11 @@
     "dev": "nodemon app.js --experimental-specifier-resolution=node"
   },
   "dependencies": {
+    "@arcjet/node": "^1.0.0-beta.1",
     "@emailjs/browser": "^4.4.1",
     "@emailjs/nodejs": "^5.0.2",
     "@upstash/workflow": "^0.2.6",
+    "arcjet": "^1.0.0-beta.1",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "~1.4.4",
