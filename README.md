@@ -20,6 +20,26 @@ Implement user registration, login, and JWT-based authentication.
 
 ---
 
+
+# Database
+MONGO_URI=mongodb://localhost:27017/subscriptionDB
+
+# JWT & Security
+JWT_SECRET=your_jwt_secret
+ARCJET_KEY=your_arcjet_key
+
+# Upstash QStash & Workflow
+QSTASH_TOKEN=your_qstash_token
+QSTASH_CURRENT_SIGNING_KEY=your_current_signing_key
+QSTASH_NEXT_SIGNING_KEY=your_next_signing_key
+VPS_PUBLIC_IP=https://your-public-domain.com
+
+# EmailJS
+EMAILJS_SERVICE_ID=your_emailjs_service_id
+EMAILJS_TEMPLATE_ID=your_emailjs_template_id
+EMAILJS_USER_ID=your_emailjs_user_id
+
+
 ---
 Here's a comprehensive and **step-by-step markdown guide** to deploy your Node.js app to a VPS server, based on our troubleshooting journey:
 

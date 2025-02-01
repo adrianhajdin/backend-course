@@ -3,12 +3,11 @@ import express from 'express';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const { serve } = require('@upstash/workflow/express');
-
 import { handleWorkflow } from '../controllers/workflow.controller.js';
 
 const router = express.Router();
 
-// This route is triggered by QStash and automatically verifies the Upstash signature.
+// The route for QStash to trigger workflow actions.
 router.post('/', serve(handleWorkflow));
 
 export default router;

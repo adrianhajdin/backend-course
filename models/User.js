@@ -1,15 +1,15 @@
-import mongoose from "mongoose";
+// models/User.js
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    subscriptions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subscription" }],
+    subscriptions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' }],
   },
   { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema);
-
+const User = mongoose.model('User', userSchema);
 export default User;

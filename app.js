@@ -1,58 +1,59 @@
-// app.js
+import 'dotenv/config'; // Load environment variables from .env
 import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
+import createError from 'http-errors';
+import { fileURLToPath } from 'url';
+
+// Database connection
 import connectDB from './config/db.js';
-import path from "path";
-import cookieParser from "cookie-parser";
-import logger from "morgan";
-import createError from "http-errors";
-// Remove direct Arcjet imports from here.
+
+// Import Arcjet global middleware from config
 import { arcjetMiddleware } from './config/arcjet.js';
 
 // Import routes
-import userRoutes from "./routes/user.routes.js";
+import userRoutes from './routes/user.routes.js';
+import subscriptionRoutes from './routes/subscription.routes.js';
 import workflowRoutes from './routes/workflow.routes.js';
-import subscriptionRoutes from "./routes/subscription.routes.js";
 
-import { fileURLToPath } from "url";
-
-// Initialize Express app
 const app = express();
 
-// Connect to the database
+// Connect to MongoDB
 connectDB();
 
-// Define __dirname in ES modules
+// Define __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Set up middleware for static assets, logging, parsing, etc.
-app.use(express.static(path.join(__dirname, "public")));
-app.use(logger("dev"));
+// Middleware
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(logger('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.json());
 
-// Apply Arcjet global protection to all incoming requests.
+// Global security middleware (Arcjet)
 app.use(arcjetMiddleware);
 
 // Define routes
+app.use('/api/users', userRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/workflow', workflowRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/subscriptions", subscriptionRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Welcome to the Subscriptions API");
+// Basic route for testing
+app.get('/', (req, res) => {
+  res.send('Welcome to the Subscriptions API');
 });
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
-  next(createError(404));
+  next(createError(404, 'Not Found'));
 });
 
-// Global error handler
+// Centralized error handler
 app.use((err, req, res, next) => {
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
+  console.error(err);
   res.status(err.status || 500);
   res.json({
     error: {
@@ -62,12 +63,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Set port and start the server
 const PORT = process.env.PORT || 5500;
-app.set("port", PORT);
-
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`___ Server running on http://localhost:${PORT} ___`);
 });
 
 export default app;

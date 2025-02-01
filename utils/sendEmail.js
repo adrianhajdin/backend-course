@@ -1,49 +1,46 @@
-import axios from "axios";
+// utils/sendEmail.js
+import axios from 'axios';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const { Client } = require('@upstash/workflow');
 
+// Initialize Upstash client with QStash token
 const client = new Client({ token: process.env.QSTASH_TOKEN });
 
+// Sends an email via EmailJS REST API.
 export const sendEmail = async ({ to, subject, message }) => {
   try {
     const response = await axios.post(
-      "https://api.emailjs.com/api/v1.0/email/send",
+      'https://api.emailjs.com/api/v1.0/email/send',
       {
         service_id: process.env.EMAILJS_SERVICE_ID,
         template_id: process.env.EMAILJS_TEMPLATE_ID,
         user_id: process.env.EMAILJS_USER_ID,
         template_params: {
           to_email: to,
-          subject: subject,
-          message: message,
+          subject,
+          message,
         },
       },
       {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { 'Content-Type': 'application/json' },
       }
     );
-
-    console.log("Email sent successfully:", response.data);
+    console.log('Email sent successfully:', response.data);
     return response.data;
   } catch (error) {
-    console.error("Error sending email:", error.response?.data || error.message);
+    console.error('Error sending email:', error.response?.data || error.message);
     throw error;
   }
 };
 
-/**
- * Schedules a payment reminder using Upstash QStash.
- * NOTE: For testing, adjust reminderTime as needed.
- */
+// Schedules a payment reminder using Upstash QStash.
+// For testing, you can override reminderTime to a near-future time.
 export const schedulePaymentReminder = async (subscription) => {
-  // For testing, you might want to trigger this immediately.
   const reminderTime = new Date(subscription.renewalDate);
   reminderTime.setDate(reminderTime.getDate() - 3); // 3 days before renewal
-  // For immediate testing, you can override:
-  // const reminderTime = new Date(Date.now() + 60 * 1000); // 1 minute from now
+  // For immediate testing, you might override as:
+  // const reminderTime = new Date(Date.now() + 60000); // 1 minute later
 
   try {
     await client.trigger({
@@ -57,15 +54,15 @@ export const schedulePaymentReminder = async (subscription) => {
   }
 };
 
+// Sends a reminder email for a subscription.
 export const sendReminder = async (subscription) => {
   try {
-    // IMPORTANT: Ensure that the subscription has a userEmail.
-    // Either populate the user email when creating the subscription
-    // or query the User model here to retrieve it.
     const message = `
       Hi there,
       
-      This is a reminder that your subscription to ${subscription.name} is due for renewal on ${new Date(subscription.renewalDate).toDateString()}.
+      This is a reminder that your subscription to ${subscription.name} is due for renewal on ${new Date(
+      subscription.renewalDate
+    ).toDateString()}.
       
       Price: $${subscription.price.toFixed(2)}
       Frequency: ${subscription.frequency}
@@ -74,9 +71,8 @@ export const sendReminder = async (subscription) => {
       
       Thank you!
     `;
-
     await sendEmail({
-      to: subscription.userEmail, // Ensure this field is present
+      to: subscription.userEmail,
       subject: `Reminder: ${subscription.name} Subscription Renewal`,
       message,
     });
