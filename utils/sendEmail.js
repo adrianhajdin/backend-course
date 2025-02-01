@@ -60,20 +60,25 @@ export const sendReminder = async (subscription) => {
     const message = `
       Hi there,
       
-      This is a reminder that your subscription to ${subscription.name} is due for renewal on ${new Date(
-      subscription.renewalDate
-    ).toDateString()}.
+      We hope you're doing well! This is a friendly reminder that your subscription to ${subscription.name} is coming up for renewal on ${new Date(
+        subscription.renewalDate
+      ).toDateString()}.
       
-      Price: $${subscription.price.toFixed(2)}
-      Frequency: ${subscription.frequency}
-      
-      Please ensure you have sufficient funds for the renewal.
-      
-      Thank you!
+      Subscription Details:
+      - Price: $${subscription.price.toFixed(2)}
+      - Frequency: ${subscription.frequency}
+    
+      To ensure uninterrupted service, please make sure that your payment information is up to date and sufficient funds are available.
+
+      Thank you for being a valued member, and we're here if you need any assistance.
+
+      Best regards,
+      JSM Team
     `;
+
     await sendEmail({
       to: subscription.userEmail,
-      subject: `Reminder: ${subscription.name} Subscription Renewal`,
+      subject: `Renewal Reminder: Your Subscription is Due Soon`,
       message,
     });
     console.log(`Reminder email sent for subscription: ${subscription.name}`);
