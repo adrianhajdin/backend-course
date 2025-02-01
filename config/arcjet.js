@@ -18,16 +18,20 @@ export const arcjetMiddleware = async (req, res, next) => {
     const decision = await aj.protect(req, { requested: 1 });
     if (decision.isDenied()) {
       if (decision.reason.isRateLimit()) {
-        return res.status(429).json({ error: 'Too Many Requests' });
+        console.warn(`Rate limit exceeded for IP: ${req.ip}`);
+        return res.status(429).json({ error: 'Too many requests, please try again later' });
       }
       if (decision.reason.isBot()) {
+        console.warn(`Bot detected from IP: ${req.ip}`);
         return res.status(403).json({ error: 'Forbidden: Bot detected' });
       }
+      console.warn(`Access denied for IP: ${req.ip}`);
       return res.status(403).json({ error: 'Forbidden' });
     }
     next();
   } catch (error) {
     console.error('Arcjet middleware error:', error);
+    res.status(500).json({ error: 'Internal Server Error: Arcjet middleware failure' });
     next();
   }
 };
@@ -47,6 +51,7 @@ export const validateEmail = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Email validation error:', error);
+    res.status(500).json({ error: 'Server error during email validation' });
     next();
   }
 };
