@@ -2,6 +2,9 @@
 import mongoose from 'mongoose';
 import Subscription from '../models/Subscription.js';
 
+// Helper function to insure the user is the subscription owner
+const isOwner = (subscription, userId) => subscription.user.toString() === userId;
+
 // Helper function to fetch a subscription without auth check.
 // Used by the workflow controller.
 export const findSubscriptionById = async (id) => {
@@ -21,8 +24,8 @@ export const getSubscriptionById = async (req, res) => {
     const { id } = req.params;
     const subscription = await findSubscriptionById(id);
     // Ensure that the authenticated user owns the subscription
-    if (subscription.user.toString() !== req.user.id) {
-      return res.status(401).json({ message: 'Unauthorized' });
+    if (!isOwner(subscription, req.user.id)) {
+      return res.status(403).json({ message: 'Access denied' });
     }
     res.status(200).json(subscription);
   } catch (error) {
@@ -61,6 +64,12 @@ export const addSubscription = async (req, res) => {
     res.status(201).json(savedSubscription);
   } catch (error) {
     console.error('Error adding subscription:', error.message);
+
+    // Handle duplicate key errors (e.g., unique constraint violations)
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Subscription with this name already exists for the user.' });
+    }
+
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -74,13 +83,15 @@ export const updateSubscription = async (req, res) => {
     if (!subscription) {
       return res.status(404).json({ message: 'Subscription not found' });
     }
-    if (subscription.user.toString() !== req.user.id) {
-      return res.status(401).json({ message: 'Unauthorized' });
+    if (!isOwner(subscription, req.user.id)) {
+      return res.status(403).json({ message: 'Access denied' });
     }
-    subscription.name = name || subscription.name;
-    subscription.price = price || subscription.price;
-    subscription.frequency = frequency || subscription.frequency;
-    subscription.renewalDate = renewalDate || subscription.renewalDate;
+
+    if (name) subscription.name = name;
+    if (price) subscription.price = price;
+    if (frequency) subscription.frequency = frequency;
+    if (renewalDate) subscription.renewalDate = renewalDate;
+
     const updatedSubscription = await subscription.save();
     res.status(200).json(updatedSubscription);
   } catch (error) {
@@ -97,8 +108,8 @@ export const deleteSubscription = async (req, res) => {
     if (!subscription) {
       return res.status(404).json({ message: 'Subscription not found' });
     }
-    if (subscription.user.toString() !== req.user.id) {
-      return res.status(401).json({ message: 'Unauthorized' });
+    if (!isOwner(subscription, req.user.id)) {
+      return res.status(403).json({ message: 'Access denied' });
     }
     await subscription.deleteOne();
     res.status(200).json({ message: 'Subscription deleted' });
