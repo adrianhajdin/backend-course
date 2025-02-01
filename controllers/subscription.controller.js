@@ -1,17 +1,30 @@
 import mongoose from "mongoose";
-
 import Subscription from "../models/Subscription.js";
 
-export const getSubscriptionById = async (req, res) => {
-  const { id } = req.params;
+import { schedulePaymentReminder} from '../utils/sendEmail.js'
+
+// Helper for internal use (workflow, etc.) – does not perform auth check.
+export const findSubscriptionById = async (id) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: `Invalid subscription ID: ${id}` });
+      throw new Error(`Invalid subscription ID: ${id}`);
     }
     const subscription = await Subscription.findById(id);
     if (!subscription) {
-      return res.status(404).json({ message: "Subscription not found" });
+      throw new Error("Subscription not found");
     }
+    return subscription;
+  } catch (error) {
+    console.error(`Error fetching subscription by ID: ${error.message}`);
+    throw error;
+  }
+};
+
+// Express route version that includes authorization.
+export const getSubscriptionById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const subscription = await findSubscriptionById(id);
     if (subscription.user.toString() !== req.user.id) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -33,7 +46,7 @@ export const getSubscriptions = async (req, res) => {
 };
 
 export const addSubscription = async (req, res) => {
-  const { name, price, frequency, renewalDate,  } = req.body;
+  const { name, price, frequency, renewalDate } = req.body;
   if (!name || !price || !frequency || !renewalDate) {
     return res.status(400).json({ message: "Please fill all required fields" });
   }
@@ -44,8 +57,13 @@ export const addSubscription = async (req, res) => {
       frequency,
       renewalDate,
       user: req.user.id,
+      // NOTE: Consider populating or storing the user's email here if needed for reminders.
+      // e.g., userEmail: req.user.email,
     });
     const savedSubscription = await subscription.save();
+
+    await schedulePaymentReminder(subscription);
+
     return res.status(201).json(savedSubscription);
   } catch (error) {
     console.error(`Error adding subscription: ${error.message}`);
@@ -55,7 +73,7 @@ export const addSubscription = async (req, res) => {
 
 export const updateSubscription = async (req, res) => {
   const { id } = req.params;
-  const { name, price, frequency, renewalDate, } = req.body;
+  const { name, price, frequency, renewalDate } = req.body;
   try {
     const subscription = await Subscription.findById(id);
     if (!subscription) {
